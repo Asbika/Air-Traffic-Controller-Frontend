@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/MapRouting/MapRouting.css" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="shortcut icon" href="#">
+    <title>Air Traffic Simulator</title>
+</head>
+<body>
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/geodata/worldLow.js"></script>
+    
+    <div id="im" ><a href="/MapRouting/index.html"><img width="50px" height="50px" src="/MapRouting/home.png"></a></div>
+      
+    <script></script>
+    <div id="chartdiv"></div>
+    <script>
+        // function startSimulation(){
+        // Create map instance
+        var chart = am4core.create("chartdiv", am4maps.MapChart);
+            
+        // Set map definition
+        chart.geodata = am4geodata_worldLow;
+
+        // Set projection
+        chart.projection = new am4maps.projections.Miller();
+
+        // Create map polygon series
+        var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+
+        // Make map load polygon (like country names) data from GeoJSON
+        polygonSeries.useGeodata = true;
+
+        // Configure series
+        var polygonTemplate = polygonSeries.mapPolygons.template;
+        polygonTemplate.tooltipText = "{name}";
+        polygonTemplate.fill = am4core.color("darkgray");
+        var hs = polygonTemplate.states.create("hover")
+        hs.properties.fill = am4core.color("#367B25");
+
+        // Remove Antarctica
+        polygonSeries.exclude = ["AQ"];
+        // Add some data
+        // Create image series
+        var imageSeries = chart.series.push(new am4maps.MapImageSeries());
+
+        // Create a circle image in image series template so it gets replicated to all new images
+        // Add line series
+        var lineSeries = chart.series.push(new am4maps.MapLineSeries());
+        lineSeries.mapLines.template.strokeWidth = 2;
+        lineSeries.mapLines.template.line.strokeOpacity=0.5;
+        lineSeries.mapLines.template.stroke = am4core.color("red");
+    
+        lineSeries.mapLines.template.nonScalingStroke = false;
+
+        var h=imageSeries.states.create("hover")
+    
+        h.properties.strokeWidth = 1000;
+        var line = lineSeries.mapLines.create();
+        lineSeries.mapLines.template.shortestDistance = false;
+        
+        var line = lineSeries.mapLines.create();
+        var line2 = lineSeries.mapLines.create();
+
+        line.line.controlPointDistance = -0.3;
+        var imageSeriesTemplate = imageSeries.mapImages.template;
+            var table1 = new Array();
+            var table2 = new Array();
+            
+        fetch('http://localhost:8090/aeroportList').then((data)=>{
+            return data.json();
+        }).then((cdata)=>{
+           //definition of cty's parametres.
+            function addCity(coords, title) {
+            var city = cities.mapImages.create();
+            city.latitude = coords.latitude;
+            city.longitude = coords.longitude;
+            city.tooltipText = title;
+            return city;
+}
+        for(i=0;i<cdata.length;i++){
+            for(j=0;j<1;j++){
+            table1.push(cdata[i].nomAeroport);
+            table1.push(latitude=cdata[i].axeX);
+            table1.push(longitude=cdata[i].axeY);
+            table2.push(table1);
+            table1=[];
+            }
+          }
+    
+        var marker = imageSeriesTemplate.createChild(am4core.Image);
+        marker.href ="Airport_symbol.svg";
+        marker.width=20;
+        marker.height=20;
+        marker.nonScaling=true;
+        marker.tooltipText = "{0}";
+        marker.fill = am4core.color("orange");
+        marker.horizontalCenter="middle";
+        marker.verticalCenter="bottom";
+
+        // Set property fields
+        imageSeriesTemplate.propertyFields.latitude = "1";
+        imageSeriesTemplate.propertyFields.longitude = "2";
+
+        // Add data for the three cities
+        //Aeroport Description
+
+    for(p=0;p<cdata.length;p++){
+        var objett1 = new Array();
+        objett1.push(cdata[p].nomAeroport);
+        objett1.push("\n");
+        objett1.push("Pistes : "+cdata[p].nbrPistes);
+        objett1.push("\n");
+        objett1.push("Places au sol : "+cdata[p].nbrPlaceAuSol+" UT");
+        objett1.push("\n");
+        objett1.push("Attente au sol : "+cdata[p].tempAtenteAuSol+" UT");
+        objett1.push("\n");
+        objett1.push("Accès aux pistes : "+cdata[p].tempAcceAuxPistes+" UT");
+        objett1.push("\n");
+        objett1.push("Durée atter./décol : "+cdata[p].tempDecolageAtterissage+" UT");
+        objett1.push("\n");
+        objett1.push("nti-collision (inter att./decol.) : "+cdata[p].delaiAntiCollision+" UT");
+        objett1.push("\n");
+        objett1.push("Boucle d attente : "+cdata[p].dureeBoucleDAttentEnVol+" UT");
+
+        table2[p][0]=objett1;
+    }
+        for(i=0;i<table2.length;i++){
+        imageSeries.data.push(table2[i]);
+        }   
+});
+
+    //fetch data that concerned vols
+    fetch('http://localhost:8090/simulerVols').then((data)=>{
+        return data.json();
+    }).then((objects)=>{
+        var table6 = new Array();
+        var table7 = new Array();
+        var table8 = new Array();
+        var table9 = new Array();
+
+        for(i=0 ; i<2;i++){
+        for( j=0; j<objects.length; j++){
+        table6.push(objects[j].avionDto);
+        table7.push(objects[j].chemin);
+        }
+
+        chart.seriesContainer.resizable
+
+        for(i=0;i<table7.length;i++){
+            for(j=0;j<table7[i].length;j++){
+                    table8.push(table7[i][j].nomAeroport);
+                    table8.push(latitude=table7[i][j].axeX);
+                    table8.push(longitude=table7[i][j].axeY);
+                    table9.push(table8);
+                    table8=[];
+            }
+        }  
+
+        //Seting a path to fligh.
+        var objett1 = new Array();
+        var objett3 = new Array();
+        var objett4 = new Array();
+        var objett5 = new Array();
+        var objett = new Array();
+         
+        let k=0;
+
+        for(i=0;i<table7.length;i++){
+            for(j=0;j<table7[i].length;j++){
+            
+                var obj1 = new Object();
+                obj1.latitude=table9[k][1];
+                obj1.longitude=table9[k][2];
+                objett1[j]=obj1; 
+                k++;
+            }   
+                objett3[i]=objett1;
+                for(p=0; p<objett1.length;p++){
+                objett1=[];
+            }
+        }
+
+        for(u=0;u<objett3.length;u++){
+            objett4.push(objett3[u]);
+            objett5.push(objett4);
+            objett4=[];
+        }
+            
+        var colors = new Array();
+        colors.push("#367B25");
+        colors.push("#ff5811");
+        colors.push("#1111ff");
+        colors.push("#fa0a9e");
+        colors.push("#050505");
+        colors.push("#00fff2");
+        var kk=0;
+        var varSimulation = 0;
+
+        //var fin=5;
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        var o=0;
+        async function demo() {
+    
+           for(l=0;l<objett3.length+1;l++){
+                
+                if(l==objett3.length){
+                        
+                        varSimulation=objects[l-1].heureDepart;
+                    
+                        var line = lineSeries.mapLines.create();
+                        line.multiGeoLine=objett5[l-1];
+
+                        //Create a plane to fligh.
+                        var bullet = line.lineObjects.create();
+                        return;
+                 }
+        await sleep(((objects[l].heureDepart)-varSimulation) * 6000);
+        varSimulation=objects[l].heureDepart;
+        var line = lineSeries.mapLines.create();
+        line.multiGeoLine=objett5[l];
+
+        //Create a plane to fligh.
+        var bullet = line.lineObjects.create();
+        bullet.nonScaling = false;
+        bullet.position = 0.0;
+        bullet.width = 0;
+        bullet.height = 0;
+ 
+        // Enable small map
+        chart.smallMap = new am4maps.SmallMap();
+        chart.smallMap.series.push(polygonSeries);
+
+        // Disable zoom and pan
+        chart.maxZoomLevel = 1;
+        chart.seriesContainer.draggable = false;
+        chart.seriesContainer.resizable = false;
+        
+        var plane = bullet.createChild(am4core.Sprite);
+        plane.scale = 0.04;
+        plane.path = "m2,106h28l24,30h72l-44,-133h35l80,132h98c21,0 21,34 0,34l-98,0 -80,134h-35l43,-133h-71l-24,30h-28l15,-47";
+        plane.fill = am4core.color(colors[l]);
+        plane.strokeOpacity = 0;
+
+        plane.tooltipText = "Type Avion: "+objects[l].avionDto.typeAvion + "\nCapacite Carburant: "+objects[l].avionDto.capaciteCarburant
+        + "\nConsommation: "+objects[l].avionDto.consommation;
+
+        // set series tooltip
+        lineSeries.tooltip = new am4core.Tooltip();
+        lineSeries.tooltip.background.fill = am4core.color("#fff");
+        lineSeries.tooltip.follow = true;
+
+        // enable hover
+        bullet.hover = true;
+        // set interval to update plane position
+
+        bullet.nonScaling = true;
+        bullet.position = 0.0;
+        bullet.width = 10;
+        bullet.height = 10;
+        
+        bullet.horizontalCenter = "middle";
+        bullet.verticalCenter = "middle";
+                 
+        function goPlane() {
+           
+        var from = bullet.position, to;
+        if (from == 0) {
+            
+            to = 1;
+            plane.rotation = 0;
+        }
+               
+        var animation = bullet.animate({
+            from: from,
+            to: to,
+            property: "position"
+        }, 100000, am4core.ease.sinInOut);
+        animation.events.on("animationended", goPlane)
+        }
+        goPlane();    
+    }
+} 
+demo();
+    }   
+});
+</script>
+</body>
+</html>

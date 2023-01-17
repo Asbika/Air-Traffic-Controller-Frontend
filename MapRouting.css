@@ -1,0 +1,30 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: aqua;
+}
+
+#chartdiv {
+  /* color: darkgray; */
+  position: center;
+  height: 650px;
+  /* min-width: 310px; */
+  width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.amcharts-myline {
+  color: aliceblue;
+}
+/* #MA {
+  background-color: red;
+} */
+/* #hi{
+z-index: index 10px;;
+} */
+
+#im {
+  width: 10000px;
+  position: fixed;
+  top:20px;
+  left:20px;
+ }
